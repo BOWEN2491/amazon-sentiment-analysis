@@ -25,3 +25,8 @@ access_token
 Thumbs.db
 .idea/
 .vscode/
+
+# Machine-specific generated provenance (retain shareable EDA outputs)
+/outputs/raw_manifest.json
+/outputs/sample_manifest.json
+*.manifest.json
