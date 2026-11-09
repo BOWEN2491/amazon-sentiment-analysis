@@ -1,0 +1,124 @@
+{
+  "total_reviews": 50000,
+  "rating_distribution": {
+    "1": {
+      "count": 4731,
+      "percentage": 9.462
+    },
+    "2": {
+      "count": 2659,
+      "percentage": 5.318
+    },
+    "3": {
+      "count": 3709,
+      "percentage": 7.417999999999999
+    },
+    "4": {
+      "count": 7191,
+      "percentage": 14.382
+    },
+    "5": {
+      "count": 31710,
+      "percentage": 63.42
+    }
+  },
+  "sentiment_distribution": {
+    "Negative": {
+      "count": 7390,
+      "percentage": 14.78
+    },
+    "Neutral": {
+      "count": 3709,
+      "percentage": 7.417999999999999
+    },
+    "Positive": {
+      "count": 38901,
+      "percentage": 77.802
+    }
+  },
+  "sentiment_mapping": {
+    "1": "Negative",
+    "2": "Negative",
+    "3": "Neutral",
+    "4": "Positive",
+    "5": "Positive"
+  },
+  "sentiment_mapping_status": "Provisional; pending group confirmation",
+  "word_count": {
+    "mean": 80.42688,
+    "nonmissing_texts": 50000,
+    "missing_texts_excluded": 0,
+    "whitespace_only_texts": 0,
+    "definition": "Original Text split on whitespace; missing text excluded, whitespace-only text counted as zero; HTML and punctuation retained."
+  },
+  "missing_values": {
+    "Id": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "ProductId": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "UserId": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "ProfileName": {
+      "count": 2,
+      "percentage": 0.004
+    },
+    "HelpfulnessNumerator": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "HelpfulnessDenominator": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "Score": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "Time": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "Summary": {
+      "count": 2,
+      "percentage": 0.004
+    },
+    "Text": {
+      "count": 0,
+      "percentage": 0.0
+    }
+  },
+  "duplicates": {
+    "exact_rows_extra_occurrences": 0,
+    "review_texts_extra_occurrences": 3674,
+    "definition": "Extra occurrences after the first: exact rows compare all original columns; review texts compare nonmissing Text exactly."
+  },
+  "class_imbalance": {
+    "largest_to_smallest_ratio": 10.488271771366945,
+    "missing_classes": [],
+    "threshold": 2.0,
+    "is_imbalanced": true,
+    "interpretation": "Descriptive largest/smallest class ratio >= 2; not an inferential significance test. A missing class is imbalanced and its ratio is undefined."
+  },
+  "group": "Phi",
+  "seed": 47,
+  "original_dataset_size": 568454,
+  "sample_path": "D:\\Downloads\\group_sample_seed47.csv",
+  "sample_sha256": "5798090bd682b00307aeff335da47c6f08a4db878d52305a110a05406b733cec",
+  "generated_at_utc": "2026-11-09T18:57:18.447675+00:00",
+  "versions": {
+    "python": "3.11.9",
+    "pandas": "3.0.5",
+    "numpy": "2.3.3",
+    "matplotlib": "3.10.6",
+    "platformdirs": "4.14.5"
+  },
+  "sample_unchanged": true,
+  "rating_chart": "outputs\\figures\\score_distribution.png",
+  "dataset_summary": "docs\\m1_dataset_summary.md"
+}

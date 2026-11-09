@@ -1,0 +1,27 @@
+# Raw and sampled datasets, including alternate local copies
+*.csv
+*.zip
+*.gz
+*.sqlite
+*.sqlite3
+*.db
+*.partial
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.cache/
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+.kaggle/
+kaggle.json
+access_token
+*.pem
+*.key
+# OS/editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

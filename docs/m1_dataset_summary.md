@@ -1,0 +1,7 @@
+# Dataset Summary
+
+We use Amazon Fine Food Reviews from [Kaggle](https://www.kaggle.com/datasets/snap/amazon-fine-food-reviews), originally collected by [Stanford SNAP](https://snap.stanford.edu/data/web-FineFoods.html). The source contains 568,454 reviews. Group Phi generated a fixed sample of 50,000 reviews using pandas random sampling without replacement and random_state=47, with no prior cleaning or reordering. The official sampled CSV is preserved unchanged for subsequent project work.
+
+The proposed mapping assigns scores 1–2 to Negative, 3 to Neutral, and 4–5 to Positive; this mapping remains subject to group confirmation. The resulting distribution is negative 7,390 (14.78%), neutral 3,709 (7.42%), positive 38,901 (77.80%). Mean review length is 80.43 words, calculated by whitespace splitting of original Text; missing text is excluded and whitespace-only text counts as zero. HTML and punctuation are retained.
+
+Missing values are Text: 0, Summary: 2, and Score: 0; other missing fields are ProfileName (2). There are 0 duplicate rows across all original columns and 3,674 repeated nonmissing review texts, counting occurrences after the first. No missing values or duplicates were removed. The largest-to-smallest sentiment class ratio is 10.49:1, indicating class imbalance using a descriptive 2:1 threshold, rather than a significance test. The accompanying 300-DPI bar chart displays counts and percentages for ratings 1–5.
