@@ -124,7 +124,7 @@ On macOS/Linux use `.venv/bin/python` and `.venv/bin/kaggle` for the correspondi
 - Custom download/sample destinations use separate `<filename>.manifest.json` sidecars. The analysis script has no custom-path options and continues to use the default official sample.
 - An interrupted download or extraction can leave `.partial` files. Inspect incomplete files before removing them and retrying; scripts do not automatically resume or clean them up. ZIP integrity and extracted CSV structure are validated.
 - Running analysis rewrites the tracked statistics JSON, chart, and M1 summary. Inspect those changes before committing regenerated results. This documentation refactor does not execute data scripts or regenerate outputs.
-- No missing values or duplicates are removed. The sentiment mapping, final model choices, and remaining team roles require group confirmation; model training and deployment are later work.
+- No missing values or duplicates are removed. The sentiment mapping and final model choices require group confirmation; model training and deployment are later work.
 
 Raw/sample CSVs, Kaggle archives, virtual environments, credentials, and local manifests remain outside Git. The shared repository retains the verified EDA statistics, rating chart, and M1 summary.
 

@@ -133,7 +133,7 @@ Positive reviews remain the majority: official training shares are 77.8000% Posi
 
 ## Reproduction and ML integration
 
-Run from the repository root using Python 3.11. Until M2 is merged into main, use the published `feature/m2-data-pipeline` branch; after a fresh clone, select it with `git switch feature/m2-data-pipeline`. Existing users with the official sample and local sample manifest do not need to rerun M1 sampling or EDA. A new clone must first follow the existing [source/sample setup](data_engineering.md#complete-reproduction); do not replace a conflicting official sample just to bypass validation.
+Run from the repository root using Python 3.11. The M2 pipeline is merged into `main`; use the default branch after cloning, without a feature-branch checkout. `build_features()` uses the official group-aware split by default. Existing users with the official sample and local sample manifest do not need to rerun M1 sampling or EDA. A new clone must first follow the existing [source/sample setup](data_engineering.md#complete-reproduction); do not replace a conflicting official sample just to bypass validation.
 
 Windows PowerShell:
 
