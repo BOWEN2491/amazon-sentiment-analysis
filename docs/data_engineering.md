@@ -127,3 +127,11 @@ On macOS/Linux use `.venv/bin/python` and `.venv/bin/kaggle` for the correspondi
 - No missing values or duplicates are removed. The sentiment mapping, final model choices, and remaining team roles require group confirmation; model training and deployment are later work.
 
 Raw/sample CSVs, Kaggle archives, virtual environments, credentials, and local manifests remain outside Git. The shared repository retains the verified EDA statistics, rating chart, and M1 summary.
+
+## M2 continuation
+
+The M1 procedures and verified results above are preserved. The [M2 feature engineering report](m2_feature_engineering.md) documents the new reusable `data_pipeline.py` interface, training-only BoW/TF-IDF features, standard shared split, duplicate-leakage audit, group-aware comparison, association rankings, and Jacob's integration example.
+
+M2 additionally uses pinned scikit-learn 1.9.1 and SciPy 1.16.3 from the updated requirements. With the existing official sample and local sample manifest, run `python -m data_pipeline` using the virtual-environment interpreter; there is no need to rerun M1 sampling or EDA. Full Windows/macOS/Linux commands and tests are in the M2 report. The pipeline preserves the official CSV and M1 generated results. Local M2 split indices and metadata are ignored by Git; only the new summary JSON, figures, source, tests, and documentation are shareable.
+
+The standard stratified 40,000/10,000 split remains the default. Any switch to duplicate-isolated grouping, optional Summary input, or final sentiment mapping requires group confirmation. Models and the application remain future work.

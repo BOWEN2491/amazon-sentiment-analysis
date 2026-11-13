@@ -6,7 +6,7 @@
 
 We are building a sentiment analysis platform for Amazon food review text. The planned system will compare at least two text feature representations, at least two classical machine learning models, and at least one deep/modern NLP model. Evaluation will report accuracy, precision, recall, F1-score, and confusion matrices. A planned Streamlit application will support live sentiment prediction using at least two trained models.
 
-**Current progress:** fixed-sample data preparation and exploratory data analysis (EDA) are complete. Models have not been trained, and the application has not been developed.
+**Current progress:** fixed-sample data preparation, exploratory data analysis (EDA), and the M2 data/feature pipeline are implemented. Models have not been trained, and the application has not been developed.
 
 ## Team Members
 
@@ -14,6 +14,7 @@ We are building a sentiment analysis platform for Amazon food review text. The p
 | --- | --- |
 | Bowen Zheng | Data Engineer |
 | Wesley Kamau | App Engineer |
+| Jacob | ML Engineer |
 
 Other team members and roles are pending confirmation.
 
@@ -21,18 +22,18 @@ Other team members and roles are pending confirmation.
 
 Amazon Reviews → Text Preprocessing → Feature Engineering → ML Models → Evaluation → Streamlit App
 
-- Proposed feature representations: **Bag of Words** and **TF-IDF**.
+- Implemented feature representations: **Bag of Words** and **TF-IDF**.
 - Candidate classical models: **Naive Bayes** and **Logistic Regression**.
 - Candidate deep model: **Feedforward Neural Network**.
 
-These are plans, not implemented features. Final model selections and the sentiment labeling scheme remain subject to group confirmation. The provisional labels are scores 1–2 → Negative, 3 → Neutral, and 4–5 → Positive.
+The two feature representations are implemented; the candidate models and Streamlit application remain planned. Final model selections and the sentiment labeling scheme remain subject to group confirmation. The provisional labels are scores 1–2 → Negative, 3 → Neutral, and 4–5 → Positive.
 
 ## Project Milestones
 
 | Milestone | Due | Verified status |
 | --- | --- | --- |
 | M1: Project Charter & Scope | Nov 10, 2026 | Data preparation and EDA complete; full charter completion/submission unconfirmed |
-| M2: Initial Solution | Nov 15, 2026 | Planned |
+| M2: Initial Solution | Nov 15, 2026 | Data/feature pipeline implemented; model work and full M2 submission pending |
 | M3: Refined Models & App Prototype | Nov 22, 2026 | Planned |
 | M4: Final Report | Nov 29, 2026 | Planned |
 | Final Demo | See Carmen | Planned |
@@ -78,6 +79,18 @@ python3 -m venv .venv
 
 The scripts download the source, create or verify the official sample in the operating system's Downloads directory, then analyze it. Run them in that order: local manifests are generated during reproduction and are not included in a clone. See [reproduction details and limitations](docs/data_engineering.md#complete-reproduction) before regenerating tracked outputs or handling a sample mismatch.
 
+### M2 features for existing project setups
+
+M2 currently lives on `feature/m2-data-pipeline`; until it is merged, select that branch after a fresh clone with `git switch feature/m2-data-pipeline`. With the official sample and its local sample manifest already available, install the updated requirements and run the reusable pipeline without rerunning M1 analysis:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m data_pipeline
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+On macOS/Linux use `.venv/bin/python` for the same commands. The default shared split is exactly 40,000/10,000 rows, stratified by provisional sentiment with seed 47. Both BoW and TF-IDF have 20,000 training-derived features. Duplicate-text leakage is documented; the group-aware comparison does not replace the default. See the [M2 feature engineering report](docs/m2_feature_engineering.md) for full statistics, four feature tables, figures, limitations, and Jacob's `build_features()` interface.
+
 ## Project Structure
 
 Shared files committed to the repository:
@@ -86,21 +99,28 @@ Shared files committed to the repository:
 amazon-sentiment-analysis/
 ├── docs/
 │   ├── data_engineering.md
-│   └── m1_dataset_summary.md
+│   ├── m1_dataset_summary.md
+│   └── m2_feature_engineering.md
 ├── outputs/
 │   ├── eda_statistics.json
-│   └── figures/score_distribution.png
+│   ├── m2/feature_report.json
+│   └── figures/
+│       ├── score_distribution.png
+│       ├── m2_bow_features.png
+│       └── m2_tfidf_features.png
 ├── scripts/
 │   ├── common.py
 │   ├── download_data.py
 │   ├── sample_data.py
 │   └── analyze_data.py
+├── tests/test_data_pipeline.py
+├── data_pipeline.py
 ├── requirements.txt
 ├── README.md
 └── .gitignore
 ```
 
-Local runtime files are separate: `.venv/`, `data/raw/`, generated provenance manifests, and the official CSV in the system Downloads directory are not shared through Git.
+Local runtime files are separate: `.venv/`, `data/raw/`, generated provenance manifests, M2 local split state, and the official CSV in the system Downloads directory are not shared through Git.
 
 ## Contributing
 
