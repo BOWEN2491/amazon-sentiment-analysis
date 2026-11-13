@@ -1,0 +1,348 @@
+{
+  "group": "Phi",
+  "sample_sha256": "5798090bd682b00307aeff335da47c6f08a4db878d52305a110a05406b733cec",
+  "sample_size": 50000,
+  "seed": 47,
+  "versions": {
+    "python": "3.11.9",
+    "pandas": "3.0.5",
+    "numpy": "2.3.3",
+    "scipy": "1.16.3",
+    "scikit-learn": "1.9.1"
+  },
+  "configuration": {
+    "vectorizer": {
+      "lowercase": false,
+      "stop_words": null,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "min_df": 2,
+      "max_df": 1.0,
+      "max_features": 20000
+    },
+    "preprocessing": "html-unescape_tags-to-space_lowercase_whitespace-v1",
+    "official_split": {
+      "strategy": "StratifiedGroupKFold",
+      "n_splits": 5,
+      "shuffle": true,
+      "random_state": 47,
+      "fold_index": 0,
+      "group_by": "preprocessed Text"
+    },
+    "sentiment_mapping_status": "Provisional; pending group confirmation"
+  },
+  "tfidf_settings": {
+    "sublinear_tf": true,
+    "use_idf": true,
+    "smooth_idf": true,
+    "norm": "l2",
+    "dtype": "float64"
+  },
+  "split_audit": {
+    "official_group_aware": {
+      "train_size": 40000,
+      "test_size": 10000,
+      "test_percentage": 20.0,
+      "train_classes": {
+        "Negative": {
+          "count": 5912,
+          "percentage": 14.78
+        },
+        "Neutral": {
+          "count": 2968,
+          "percentage": 7.42
+        },
+        "Positive": {
+          "count": 31120,
+          "percentage": 77.8
+        }
+      },
+      "test_classes": {
+        "Negative": {
+          "count": 1478,
+          "percentage": 14.78
+        },
+        "Neutral": {
+          "count": 741,
+          "percentage": 7.41
+        },
+        "Positive": {
+          "count": 7781,
+          "percentage": 77.81
+        }
+      },
+      "raw_text_overlap": {
+        "distinct_overlapping_texts": 0,
+        "affected_train_rows": 0,
+        "affected_test_rows": 0
+      },
+      "preprocessed_text_overlap": {
+        "distinct_overlapping_texts": 0,
+        "affected_train_rows": 0,
+        "affected_test_rows": 0
+      }
+    },
+    "stratified_baseline": {
+      "train_size": 40000,
+      "test_size": 10000,
+      "test_percentage": 20.0,
+      "train_classes": {
+        "Negative": {
+          "count": 5912,
+          "percentage": 14.78
+        },
+        "Neutral": {
+          "count": 2967,
+          "percentage": 7.4175
+        },
+        "Positive": {
+          "count": 31121,
+          "percentage": 77.8025
+        }
+      },
+      "test_classes": {
+        "Negative": {
+          "count": 1478,
+          "percentage": 14.78
+        },
+        "Neutral": {
+          "count": 742,
+          "percentage": 7.42
+        },
+        "Positive": {
+          "count": 7780,
+          "percentage": 77.8
+        }
+      },
+      "raw_text_overlap": {
+        "distinct_overlapping_texts": 1077,
+        "affected_train_rows": 1382,
+        "affected_test_rows": 1153
+      },
+      "preprocessed_text_overlap": {
+        "distinct_overlapping_texts": 1082,
+        "affected_train_rows": 1390,
+        "affected_test_rows": 1158
+      }
+    },
+    "group_aware_method": "Official: StratifiedGroupKFold(5, shuffle=True, random_state=47), first fold, grouped by preprocessed Text",
+    "raw_distinct_texts": 46326,
+    "raw_repeated_text_groups": 2978,
+    "raw_extra_occurrences": 3674,
+    "raw_groups_with_conflicting_labels": 1,
+    "preprocessed_distinct_texts": 46315,
+    "preprocessed_groups_with_conflicting_labels": 1
+  },
+  "vocabulary_sizes": {
+    "bow": 20000,
+    "tfidf": 20000
+  },
+  "matrix_shapes": {
+    "X_train_bow": [
+      40000,
+      20000
+    ],
+    "X_test_bow": [
+      10000,
+      20000
+    ],
+    "X_train_tfidf": [
+      40000,
+      20000
+    ],
+    "X_test_tfidf": [
+      10000,
+      20000
+    ]
+  },
+  "train_indices_sha256": "cfc8b431dba8ac835cd23584ba3efba983d3301e7eebdc5a9433c728d223b24c",
+  "test_indices_sha256": "1393892d955c24c96267c2506f7544c3c963a24a82bfb20b08f38416045f2320",
+  "feature_names_sha256": {
+    "bow": "2d81da9211393bdc7aed99e48e8b368482599dea96001b8e1791d24066e9f8ef",
+    "tfidf": "2d81da9211393bdc7aed99e48e8b368482599dea96001b8e1791d24066e9f8ef"
+  },
+  "ranking_methods": {
+    "bow": "Add-one smoothed class-versus-rest token log probability ratio (not log-odds)",
+    "tfidf": "Class mean minus rest mean TF-IDF weight",
+    "rest": "Both other sentiment classes, including Neutral",
+    "tie_break": "Feature name ascending",
+    "scope": "Training rows only; not classifier coefficients"
+  },
+  "top_features": {
+    "bow": {
+      "Positive": [
+        {
+          "feature": "great with",
+          "score": 4.031872584408218
+        },
+        {
+          "feature": "what more",
+          "score": 3.438254999195305
+        },
+        {
+          "feature": "definitely order",
+          "score": 3.427672889864768
+        },
+        {
+          "feature": "just love",
+          "score": 3.284981127841581
+        },
+        {
+          "feature": "worth every",
+          "score": 3.2788272622672032
+        },
+        {
+          "feature": "to everyone",
+          "score": 3.228183529448449
+        },
+        {
+          "feature": "just great",
+          "score": 3.1610442266108194
+        },
+        {
+          "feature": "this wonderful",
+          "score": 3.1328733496441235
+        },
+        {
+          "feature": "can beat",
+          "score": 3.0815800552565733
+        },
+        {
+          "feature": "every penny",
+          "score": 3.0275128339862967
+        }
+      ],
+      "Negative": [
+        {
+          "feature": "threw the",
+          "score": 4.248551870433239
+        },
+        {
+          "feature": "what waste",
+          "score": 4.086032940935464
+        },
+        {
+          "feature": "is horrible",
+          "score": 3.659764705197537
+        },
+        {
+          "feature": "buyer beware",
+          "score": 3.6442001886564253
+        },
+        {
+          "feature": "save your",
+          "score": 3.6392861738539963
+        },
+        {
+          "feature": "wasted my",
+          "score": 3.604194854042726
+        },
+        {
+          "feature": "waste your",
+          "score": 3.55924346618046
+        },
+        {
+          "feature": "don waste",
+          "score": 3.5453543540197927
+        },
+        {
+          "feature": "just awful",
+          "score": 3.450044174215469
+        },
+        {
+          "feature": "very disappointing",
+          "score": 3.450044174215469
+        }
+      ]
+    },
+    "tfidf": {
+      "Positive": [
+        {
+          "feature": "great",
+          "score": 0.011686014505470656
+        },
+        {
+          "feature": "love",
+          "score": 0.008098111868959616
+        },
+        {
+          "feature": "best",
+          "score": 0.0070876401490524085
+        },
+        {
+          "feature": "the best",
+          "score": 0.006739031960904581
+        },
+        {
+          "feature": "delicious",
+          "score": 0.005708678817879888
+        },
+        {
+          "feature": "and",
+          "score": 0.005168850575547404
+        },
+        {
+          "feature": "loves",
+          "score": 0.004704966642186415
+        },
+        {
+          "feature": "perfect",
+          "score": 0.004479088202610801
+        },
+        {
+          "feature": "my",
+          "score": 0.004446843961422874
+        },
+        {
+          "feature": "favorite",
+          "score": 0.004280813624260223
+        }
+      ],
+      "Negative": [
+        {
+          "feature": "not",
+          "score": 0.013996952650715946
+        },
+        {
+          "feature": "was",
+          "score": 0.012200380612361603
+        },
+        {
+          "feature": "were",
+          "score": 0.0063553964450460115
+        },
+        {
+          "feature": "had",
+          "score": 0.006160553812813607
+        },
+        {
+          "feature": "disappointed",
+          "score": 0.006122014125944198
+        },
+        {
+          "feature": "would",
+          "score": 0.006009033173983037
+        },
+        {
+          "feature": "bad",
+          "score": 0.0059751719591474035
+        },
+        {
+          "feature": "money",
+          "score": 0.005601968948206156
+        },
+        {
+          "feature": "what",
+          "score": 0.005471368447879217
+        },
+        {
+          "feature": "product",
+          "score": 0.004989989948257587
+        }
+      ]
+    }
+  },
+  "decision": "Group Phi adopted the first group-aware fold as official for M2 and subsequent milestones. Standard stratified splitting is retained only as a historical audit baseline. Exact 80/20 row counts are observed here, not guaranteed by SGKF."
+}

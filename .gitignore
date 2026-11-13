@@ -30,3 +30,10 @@ Thumbs.db
 /outputs/raw_manifest.json
 /outputs/sample_manifest.json
 *.manifest.json
+
+# M2 local split state and generated binary artifacts
+/outputs/m2/local/
+*.npz
+*.joblib
+*.pkl
+*.pickle
