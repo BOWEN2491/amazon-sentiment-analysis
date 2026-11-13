@@ -76,14 +76,26 @@ def make_split(labels):
                             random_state=SEED, stratify=labels)
 
 
-def shared_split(labels, sample_fingerprint, directory=LOCAL_DIR):
-    """Validate/reuse local indices; changed state is never silently overwritten."""
+def make_group_split(labels, groups):
+    """Official first SGKF fold; group sizes do not guarantee exact 80/20."""
+    if len(labels) != len(groups):
+        raise ValueError("Labels and groups must have the same number of rows.")
+    return next(StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=SEED).split(
+        np.zeros(len(labels)), labels, groups=groups))
+
+
+def shared_split(labels, sample_fingerprint, directory=LOCAL_DIR, *, groups):
+    """Reuse the official group split; preserve historical stratified files."""
     directory = Path(directory)
-    indices_file, metadata_file = directory / "split_indices.npz", directory / "split_manifest.json"
+    indices_file = directory / "group_split_indices.npz"
+    metadata_file = directory / "group_split_manifest.json"
+    grouping_hash = hashlib.sha256(json.dumps(list(groups), ensure_ascii=False).encode("utf-8")).hexdigest()
     metadata = {"sample_sha256": sample_fingerprint, "rows": len(labels),
-                "strategy": "stratified", "test_size": 0.2, "random_state": SEED,
+                "strategy": "stratified_group_k_fold", "n_splits": 5, "shuffle": True,
+                "random_state": SEED, "fold_index": 0, "group_by": "preprocessed Text",
+                "grouping_sha256": grouping_hash, "label_mapping": {str(k): v for k, v in LABEL_MAP.items()},
                 "preprocessing": PREPROCESSING, "versions": runtime_versions()}
-    expected_train, expected_test = make_split(labels)
+    expected_train, expected_test = make_group_split(labels, groups)
     if indices_file.exists() or metadata_file.exists():
         if not (indices_file.exists() and metadata_file.exists()):
             raise ValueError("Incomplete local split state; inspect it before retrying.")
@@ -136,12 +148,15 @@ class FeatureBundle:
 def build_features():
     """Return Jacob's shared sparse inputs; reuse the protected local split."""
     _, texts, labels, fingerprint = load_official_sample()
-    train, test = shared_split(labels, fingerprint)
+    train, test = shared_split(labels, fingerprint, groups=texts)
     Xb, Xbt, Xt, Xtt, bow, tfidf = fit_representations(texts[train], texts[test])
     return FeatureBundle(Xb, Xbt, Xt, Xtt, labels[train], labels[test],
                          bow.get_feature_names_out(), tfidf.get_feature_names_out(),
                          bow, tfidf, train, test,
                          {"vectorizer": dict(VECTOR_CONFIG), "preprocessing": PREPROCESSING,
+                          "official_split": {"strategy": "StratifiedGroupKFold", "n_splits": 5,
+                                             "shuffle": True, "random_state": SEED, "fold_index": 0,
+                                             "group_by": "preprocessed Text"},
                           "sentiment_mapping_status": "Provisional; pending group confirmation"}, fingerprint)
 
 
@@ -198,13 +213,12 @@ def split_description(raw, cleaned, labels, train, test):
 def audit_splits(raw, cleaned, labels, train, test):
     # Fixed first fold: do not select a fold based on test performance or appearance.
     # https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedGroupKFold.html
-    grouped_train, grouped_test = next(StratifiedGroupKFold(
-        n_splits=5, shuffle=True, random_state=SEED).split(np.zeros(len(labels)), labels, groups=cleaned))
+    baseline_train, baseline_test = make_split(labels)
     groups = pd.DataFrame({"raw": raw, "cleaned": cleaned, "label": labels})
     group_sizes = groups.groupby("raw").size()
-    return {"default_stratified": split_description(raw, cleaned, labels, train, test),
-            "group_aware_comparison": split_description(raw, cleaned, labels, grouped_train, grouped_test),
-            "group_aware_method": "StratifiedGroupKFold(5, shuffle=True, random_state=47), first fold, grouped by preprocessed Text; comparison only",
+    return {"official_group_aware": split_description(raw, cleaned, labels, train, test),
+            "stratified_baseline": split_description(raw, cleaned, labels, baseline_train, baseline_test),
+            "group_aware_method": "Official: StratifiedGroupKFold(5, shuffle=True, random_state=47), first fold, grouped by preprocessed Text",
             "raw_distinct_texts": int(len(group_sizes)),
             "raw_repeated_text_groups": int((group_sizes > 1).sum()),
             "raw_extra_occurrences": int((group_sizes - 1).sum()),
@@ -258,7 +272,7 @@ def main():
                                   "rest": "Both other sentiment classes, including Neutral",
                                   "tie_break": "Feature name ascending", "scope": "Training rows only; not classifier coefficients"},
               "top_features": rankings,
-              "recommendation": "Keep exact 80/20 stratified baseline for shared M2 comparison pending group approval; recommend group-aware split for leakage-isolated evaluation, accepting approximate row/class proportions."}
+              "decision": "Group Phi adopted the first group-aware fold as official for M2 and subsequent milestones. Standard stratified splitting is retained only as a historical audit baseline. Exact 80/20 row counts are observed here, not guaranteed by SGKF."}
     if sha256(sample_path()) != before:
         raise RuntimeError("Official sample changed; do not publish generated outputs.")
     for name, title in (("bow", "BoW: top sentiment-associated features"), ("tfidf", "TF-IDF: top sentiment-associated features")):

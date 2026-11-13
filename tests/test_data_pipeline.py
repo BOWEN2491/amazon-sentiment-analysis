@@ -28,6 +28,7 @@ class PreprocessingTests(unittest.TestCase):
 class SplitTests(unittest.TestCase):
     def setUp(self):
         self.labels = np.repeat(pipeline.LABELS, 20)
+        self.groups = np.array([f"review-{i // 2}" for i in range(60)], dtype=object)
 
     def test_exact_deterministic_stratified_partition(self):
         train, test = pipeline.make_split(self.labels)
@@ -48,52 +49,92 @@ class SplitTests(unittest.TestCase):
 
     def test_saved_split_reuses_exact_indices_without_rewriting(self):
         with tempfile.TemporaryDirectory() as directory:
-            first = pipeline.shared_split(self.labels, "sample-a", directory)
+            first = pipeline.shared_split(self.labels, "sample-a", directory, groups=self.groups)
             before = self.snapshot(directory)
-            second = pipeline.shared_split(self.labels, "sample-a", directory)
+            second = pipeline.shared_split(self.labels, "sample-a", directory, groups=self.groups)
             self.assertEqual(self.snapshot(directory), before)
             for expected, actual in zip(first, second):
                 np.testing.assert_array_equal(actual, expected)
 
     def test_source_configuration_and_version_mismatches_preserve_state(self):
-        for field in ("sample_sha256", "random_state", "versions"):
+        for field in ("sample_sha256", "random_state", "versions", "strategy",
+                      "n_splits", "fold_index", "label_mapping", "grouping_sha256", "preprocessing"):
             with self.subTest(field=field), tempfile.TemporaryDirectory() as directory:
-                pipeline.shared_split(self.labels, "sample-a", directory)
-                path = Path(directory) / "split_manifest.json"
+                pipeline.shared_split(self.labels, "sample-a", directory, groups=self.groups)
+                path = Path(directory) / "group_split_manifest.json"
                 metadata = json.loads(path.read_text(encoding="utf-8"))
                 metadata[field] = "changed"
                 path.write_text(json.dumps(metadata), encoding="utf-8")
                 before = self.snapshot(directory)
                 with self.assertRaisesRegex(ValueError, "mismatch"):
-                    pipeline.shared_split(self.labels, "sample-a", directory)
+                    pipeline.shared_split(self.labels, "sample-a", directory, groups=self.groups)
                 self.assertEqual(self.snapshot(directory), before)
 
     def test_different_source_fingerprint_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
-            pipeline.shared_split(self.labels, "sample-a", directory)
+            pipeline.shared_split(self.labels, "sample-a", directory, groups=self.groups)
             before = self.snapshot(directory)
             with self.assertRaisesRegex(ValueError, "mismatch"):
-                pipeline.shared_split(self.labels, "sample-b", directory)
+                pipeline.shared_split(self.labels, "sample-b", directory, groups=self.groups)
             self.assertEqual(self.snapshot(directory), before)
 
     def test_corrupt_indices_are_rejected_without_overwrite(self):
         with tempfile.TemporaryDirectory() as directory:
-            train, test = pipeline.shared_split(self.labels, "sample-a", directory)
-            np.savez_compressed(Path(directory) / "split_indices.npz",
+            train, test = pipeline.shared_split(self.labels, "sample-a", directory, groups=self.groups)
+            np.savez_compressed(Path(directory) / "group_split_indices.npz",
                                 train_indices=train[::-1], test_indices=test)
             before = self.snapshot(directory)
             with self.assertRaisesRegex(ValueError, "indices differ"):
-                pipeline.shared_split(self.labels, "sample-a", directory)
+                pipeline.shared_split(self.labels, "sample-a", directory, groups=self.groups)
             self.assertEqual(self.snapshot(directory), before)
 
     def test_partial_state_is_rejected_without_creation(self):
-        for filename in ("split_indices.npz", "split_manifest.json"):
+        for filename in ("group_split_indices.npz", "group_split_manifest.json"):
             with self.subTest(filename=filename), tempfile.TemporaryDirectory() as directory:
                 (Path(directory) / filename).write_bytes(b"incomplete")
                 before = self.snapshot(directory)
                 with self.assertRaisesRegex(ValueError, "Incomplete"):
-                    pipeline.shared_split(self.labels, "sample-a", directory)
+                    pipeline.shared_split(self.labels, "sample-a", directory, groups=self.groups)
                 self.assertEqual(self.snapshot(directory), before)
+
+
+    def test_group_partition_is_deterministic_complete_and_text_isolated(self):
+        raw = ["<b>Shared</b>", " shared "] + [f"review {i // 2}" for i in range(58)]
+        groups = np.array([pipeline.preprocess_text(t) for t in raw], dtype=object)
+        labels = np.tile(pipeline.LABELS, 20)  # repeated groups can contain conflicting labels
+        train, test = pipeline.make_group_split(labels, groups)
+        expected = next(pipeline.StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=47).split(
+            np.zeros(len(labels)), labels, groups=groups))
+        for actual, first_fold in zip((train, test), expected):
+            np.testing.assert_array_equal(actual, first_fold)
+        again = pipeline.make_group_split(labels, groups)
+        for actual, expected in zip((train, test), again):
+            np.testing.assert_array_equal(actual, expected)
+        self.assertFalse(set(train) & set(test))
+        self.assertEqual(sorted(np.r_[train, test].tolist()), list(range(60)))
+        self.assertFalse(set(groups[train]) & set(groups[test]))
+        self.assertEqual(0 in train, 1 in train)
+
+    def test_old_and_new_caches_coexist_without_changing_legacy_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            old_indices = Path(directory) / "split_indices.npz"
+            old_meta = Path(directory) / "split_manifest.json"
+            old_indices.write_bytes(b"historical indices")
+            old_meta.write_text('{"strategy":"stratified"}', encoding="utf-8")
+            old = {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in (old_indices, old_meta)}
+            pipeline.shared_split(self.labels, "sample-a", directory, groups=self.groups)
+            self.assertEqual(old, {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in (old_indices, old_meta)})
+            self.assertTrue((Path(directory) / "group_split_indices.npz").exists())
+
+    def test_changed_grouping_is_rejected_without_overwrite(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pipeline.shared_split(self.labels, "sample-a", directory, groups=self.groups)
+            before = self.snapshot(directory)
+            changed = self.groups.copy()
+            changed[0] = "new-group"
+            with self.assertRaisesRegex(ValueError, "mismatch"):
+                pipeline.shared_split(self.labels, "sample-a", directory, groups=changed)
+            self.assertEqual(before, self.snapshot(directory))
 
 
 class FeatureTests(unittest.TestCase):
@@ -147,8 +188,11 @@ class FeatureTests(unittest.TestCase):
         labels = np.tile(self.labels, 3)
         train, test = pipeline.make_split(labels)
         with patch.object(pipeline, "load_official_sample", return_value=(None, texts, labels, "fingerprint")), \
-                patch.object(pipeline, "shared_split", return_value=(train, test)):
+                patch.object(pipeline, "shared_split", return_value=(train, test)) as shared:
             bundle = pipeline.build_features()
+        shared.assert_called_once()
+        np.testing.assert_array_equal(shared.call_args.kwargs["groups"], texts)
+        self.assertEqual(bundle.config["official_split"]["strategy"], "StratifiedGroupKFold")
         np.testing.assert_array_equal(bundle.y_train, labels[train])
         np.testing.assert_array_equal(bundle.y_test, labels[test])
         np.testing.assert_array_equal(bundle.train_indices, train)

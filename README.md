@@ -89,7 +89,7 @@ M2 currently lives on `feature/m2-data-pipeline`; until it is merged, select tha
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-On macOS/Linux use `.venv/bin/python` for the same commands. The default shared split is exactly 40,000/10,000 rows, stratified by provisional sentiment with seed 47. Both BoW and TF-IDF have 20,000 training-derived features. Duplicate-text leakage is documented; the group-aware comparison does not replace the default. See the [M2 feature engineering report](docs/m2_feature_engineering.md) for full statistics, four feature tables, figures, limitations, and Jacob's `build_features()` interface.
+On macOS/Linux use `.venv/bin/python` for the same commands. The official default is now the first fold of StratifiedGroupKFold (five splits, shuffle=True, seed 47), grouped by preprocessed Text. This run yields 40,000/10,000 rows and zero original- or preprocessed-text overlap; exact 80/20 is not guaranteed in general. Both BoW and TF-IDF were refitted on the new official training rows and each has 20,000 features. The former standard stratified split is preserved only as a historical audit baseline. Rebuild feature inputs using `build_features()` rather than reuse historical vectorizers or trained models. See the [M2 feature engineering report](docs/m2_feature_engineering.md) for full statistics, four feature tables, figures, limitations, and Jacob's `build_features()` interface.
 
 ## Project Structure
 
