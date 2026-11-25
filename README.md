@@ -6,7 +6,7 @@
 
 We are building a sentiment analysis platform for Amazon food review text. The planned system will compare at least two text feature representations, at least two classical machine learning models, and at least one deep/modern NLP model. Evaluation will report accuracy, precision, recall, F1-score, and confusion matrices. A planned Streamlit application will support live sentiment prediction using at least two trained models.
 
-**Current progress:** M1 sampling and exploratory data analysis (EDA), and M2 feature engineering are complete. Classical model training, evaluation, and Streamlit development are not implemented in this repository.
+**Current progress:** M1 sampling and exploratory data analysis (EDA), and M2 feature engineering are complete. Classical model training and evaluation are not implemented in this repository. The Streamlit app exists as a skeleton that serves predictions once trained model artifacts are committed.
 
 ## Team Members
 
@@ -91,6 +91,14 @@ The M2 pipeline is available on `main` after the merge of [PR #1](https://github
 
 On macOS/Linux use `.venv/bin/python` for the same commands. `build_features()` uses the official group-aware split by default: the first fold of StratifiedGroupKFold (five splits, shuffle=True, seed 47), grouped by preprocessed Text. This run yields 40,000/10,000 rows and zero original- or preprocessed-text overlap; exact 80/20 is not guaranteed in general. Both BoW and TF-IDF were refitted on the new official training rows and each has 20,000 features. The former standard stratified split is preserved only as a historical audit baseline. Rebuild feature inputs using `build_features()` rather than reuse historical vectorizers or trained models. See the [M2 feature engineering report](docs/m2_feature_engineering.md) for full statistics, four feature tables, figures, limitations, and Jacob's `build_features()` interface. Quick results: [BoW figure](outputs/figures/m2_bow_features.png), [TF-IDF figure](outputs/figures/m2_tfidf_features.png), and [computed feature results](outputs/m2/feature_report.json).
 
+### Streamlit app
+
+The app serves live sentiment predictions once trained model artifacts are committed under `outputs/models/`; until then it runs in setup mode and shows the dataset and feature results.
+
+```sh
+.venv/bin/python -m streamlit run app.py
+```
+
 ## Project Structure
 
 Shared files committed to the repository:
@@ -115,6 +123,7 @@ amazon-sentiment-analysis/
 │   └── analyze_data.py
 ├── tests/test_data_pipeline.py
 ├── data_pipeline.py
+├── app.py
 ├── requirements.txt
 ├── README.md
 └── .gitignore
