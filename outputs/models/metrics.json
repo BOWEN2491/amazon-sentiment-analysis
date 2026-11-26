@@ -1,0 +1,45 @@
+{
+  "logistic_regression_tfidf": {
+    "name": "logistic_regression_tfidf",
+    "estimator": "LogisticRegression",
+    "representation": "tfidf",
+    "hyperparameters": {
+      "C": 10.0,
+      "class_weight": "balanced",
+      "max_iter": 1000
+    },
+    "test_accuracy": 0.8431,
+    "test_macro_f1": 0.6569,
+    "trained_on": "Official 50,000-review sample, group split fold 0 (seed 47)",
+    "sample_sha256": "46f0d9dadd0f9b2a2e604932182b37c3d7c0c2a063c1bc1d5fabb7605ff12258",
+    "exported_at_utc": "2026-11-26T00:55:52.797719+00:00"
+  },
+  "naive_bayes_tfidf": {
+    "name": "naive_bayes_tfidf",
+    "estimator": "MultinomialNB",
+    "representation": "tfidf",
+    "hyperparameters": {
+      "alpha": 0.1
+    },
+    "test_accuracy": 0.8488,
+    "test_macro_f1": 0.5484,
+    "trained_on": "Official 50,000-review sample, group split fold 0 (seed 47)",
+    "sample_sha256": "46f0d9dadd0f9b2a2e604932182b37c3d7c0c2a063c1bc1d5fabb7605ff12258",
+    "exported_at_utc": "2026-11-26T00:55:53.050675+00:00"
+  },
+  "logistic_regression_bow": {
+    "name": "logistic_regression_bow",
+    "estimator": "LogisticRegression",
+    "representation": "bow",
+    "hyperparameters": {
+      "C": 0.1,
+      "class_weight": "balanced",
+      "max_iter": 1000
+    },
+    "test_accuracy": 0.8372,
+    "test_macro_f1": 0.6557,
+    "trained_on": "Official 50,000-review sample, group split fold 0 (seed 47)",
+    "sample_sha256": "46f0d9dadd0f9b2a2e604932182b37c3d7c0c2a063c1bc1d5fabb7605ff12258",
+    "exported_at_utc": "2026-11-26T00:56:06.129827+00:00"
+  }
+}

@@ -6,7 +6,7 @@
 
 We are building a sentiment analysis platform for Amazon food review text. The planned system will compare at least two text feature representations, at least two classical machine learning models, and at least one deep/modern NLP model. Evaluation will report accuracy, precision, recall, F1-score, and confusion matrices. A planned Streamlit application will support live sentiment prediction using at least two trained models.
 
-**Current progress:** M1 sampling and exploratory data analysis (EDA), and M2 feature engineering are complete. Classical model training and evaluation are not implemented in this repository. The Streamlit app exists as a skeleton that serves predictions once trained model artifacts are committed.
+**Current progress:** M1 sampling and exploratory data analysis (EDA), M2 feature engineering, and M3 classical model training are complete. The Streamlit app serves live predictions from three trained classical models committed under `outputs/models/`; deep/modern NLP model work remains planned.
 
 ## Team Members
 
@@ -34,7 +34,7 @@ The two feature representations are implemented; the candidate models and Stream
 | --- | --- | --- |
 | M1: Project Charter & Scope | Nov 10, 2026 | Data preparation and EDA complete; full charter completion/submission unconfirmed |
 | M2: Initial Solution | Nov 15, 2026 | Feature engineering complete; model work not implemented; full M2 submission unconfirmed |
-| M3: Refined Models & App Prototype | Nov 22, 2026 | Planned |
+| M3: Refined Models & App Prototype | Nov 22, 2026 | Classical models trained and committed; Streamlit app serves live predictions; deep model planned |
 | M4: Final Report | Nov 29, 2026 | Planned |
 | Final Demo | See Carmen | Planned |
 
@@ -93,11 +93,13 @@ On macOS/Linux use `.venv/bin/python` for the same commands. `build_features()` 
 
 ### Streamlit app
 
-The app serves live sentiment predictions once trained model artifacts are committed under `outputs/models/`; until then it runs in setup mode and shows the dataset and feature results.
+The app serves live sentiment predictions from the trained classical models committed under `outputs/models/` (logistic regression on TF-IDF, multinomial Naive Bayes on TF-IDF, and logistic regression on BoW). Paste a review and it shows each model's prediction side by side with per-class confidence.
 
 ```sh
 .venv/bin/python -m streamlit run app.py
 ```
+
+To regenerate the artifacts from the official sample and split, run `python scripts/train_app_models.py` from the repository root. It retrains the M3 tuned configurations from `tune_classical.py`, evaluates them on the held-out test split, and rewrites `outputs/models/*.joblib` plus `outputs/models/metrics.json`. Committed test metrics: logistic regression (TF-IDF) 84.31% accuracy / 0.657 macro-F1, Naive Bayes (TF-IDF) 84.88% / 0.548, logistic regression (BoW) 83.72% / 0.656.
 
 ## Project Structure
 
@@ -112,6 +114,11 @@ amazon-sentiment-analysis/
 ├── outputs/
 │   ├── eda_statistics.json
 │   ├── m2/feature_report.json
+│   ├── models/
+│   │   ├── logistic_regression_tfidf.joblib
+│   │   ├── naive_bayes_tfidf.joblib
+│   │   ├── logistic_regression_bow.joblib
+│   │   └── metrics.json
 │   └── figures/
 │       ├── score_distribution.png
 │       ├── m2_bow_features.png
@@ -120,7 +127,8 @@ amazon-sentiment-analysis/
 │   ├── common.py
 │   ├── download_data.py
 │   ├── sample_data.py
-│   └── analyze_data.py
+│   ├── analyze_data.py
+│   └── train_app_models.py
 ├── tests/test_data_pipeline.py
 ├── data_pipeline.py
 ├── app.py
