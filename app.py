@@ -1,8 +1,10 @@
 """Group Phi: Streamlit app for live Amazon food review sentiment prediction.
 
-App Engineer deliverable. Serves the team's trained models once their
-artifacts are committed under outputs/models/; until then it runs in setup
-mode and shows the current dataset and feature-engineering results.
+App Engineer deliverable. Serves the team's trained classical models from
+outputs/models/ (see scripts/train_app_models.py) with side-by-side live
+predictions and per-class confidence. If no artifacts are committed yet it
+runs in setup mode and shows the current dataset and feature-engineering
+results.
 
 Run from the repository root:  python -m streamlit run app.py
 """
@@ -14,6 +16,8 @@ import streamlit as st
 REPO_ROOT = Path(__file__).resolve().parent
 MODEL_DIR = REPO_ROOT / "outputs" / "models"
 FIGURES_DIR = REPO_ROOT / "outputs" / "figures"
+
+SENTIMENT_COLORS = {"Negative": "#d9534f", "Neutral": "#8a8a8a", "Positive": "#3a9d5d"}
 
 
 @st.cache_resource
@@ -34,7 +38,21 @@ def predict(text, artifact):
 
     cleaned = preprocess_text(text)
     features = artifact["vectorizer"].transform([cleaned])
-    return str(artifact["model"].predict(features)[0])
+    label = str(artifact["model"].predict(features)[0])
+    probabilities = None
+    if hasattr(artifact["model"], "predict_proba"):
+        classes = [str(c) for c in artifact["model"].classes_]
+        probabilities = dict(zip(classes, artifact["model"].predict_proba(features)[0]))
+    return label, probabilities
+
+
+def model_label(name, artifact):
+    metadata = artifact.get("metadata", {})
+    estimator = metadata.get("estimator", "")
+    representation = metadata.get("representation", "")
+    if estimator and representation:
+        return f"{estimator} ({representation.upper()})"
+    return name.replace("_", " ").title()
 
 
 def prediction_page(models):
@@ -46,13 +64,59 @@ def prediction_page(models):
             "(M2/M3 model work)."
         )
         return
-    choice = st.selectbox("Model", sorted(models))
     review = st.text_area("Paste an Amazon food review", height=150)
-    if st.button("Predict"):
-        if review.strip():
-            st.write(f"**Sentiment:** {predict(review, models[choice])}")
-        else:
+    if st.button("Predict", type="primary"):
+        if not review.strip():
             st.warning("Enter a review first.")
+            return
+        results = {}
+        for name, artifact in sorted(models.items()):
+            try:
+                results[name] = predict(review, artifact)
+            except ValueError as error:
+                st.warning(str(error))
+                return
+        st.subheader("Model agreement")
+        columns = st.columns(len(results))
+        for column, (name, (label, probabilities)) in zip(columns, results.items()):
+            with column:
+                st.markdown(f"**{model_label(name, models[name])}**")
+                color = SENTIMENT_COLORS.get(label, "#333333")
+                st.markdown(
+                    f"<span style='font-size:1.6rem;font-weight:700;color:{color}'>"
+                    f"{label}</span>",
+                    unsafe_allow_html=True,
+                )
+                if probabilities:
+                    st.caption(f"Confidence: {max(probabilities.values()):.1%}")
+        st.subheader("Per-class confidence")
+        import pandas as pd
+
+        chart_rows = []
+        for name, (label, probabilities) in results.items():
+            if not probabilities:
+                continue
+            for sentiment, probability in probabilities.items():
+                chart_rows.append(
+                    {
+                        "Model": model_label(name, models[name]),
+                        "Sentiment": sentiment,
+                        "Probability": round(float(probability), 4),
+                    }
+                )
+        if chart_rows:
+            frame = pd.DataFrame(chart_rows)
+            for sentiment in ("Negative", "Neutral", "Positive"):
+                subset = frame[frame["Sentiment"] == sentiment].set_index("Model")[
+                    ["Probability"]
+                ]
+                st.markdown(f"**{sentiment}**")
+                st.bar_chart(subset, horizontal=True)
+        with st.expander("Model details"):
+            for name, artifact in sorted(models.items()):
+                metadata = artifact.get("metadata", {})
+                st.markdown(f"**{model_label(name, artifact)}** (`{name}.joblib`)")
+                st.json(metadata)
 
 
 def overview_page():

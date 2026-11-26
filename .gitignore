@@ -32,8 +32,11 @@ Thumbs.db
 *.manifest.json
 
 # M2 local split state and generated binary artifacts
+# (M3 app model artifacts under outputs/models/ are committed on purpose)
 /outputs/m2/local/
 *.npz
 *.joblib
 *.pkl
 *.pickle
+!/outputs/models/
+!/outputs/models/*.joblib
